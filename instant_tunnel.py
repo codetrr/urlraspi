@@ -1,6 +1,7 @@
 import subprocess
 import time
 import re
+import os
 
 PORTS = {
     "8080": "url8080.txt",
@@ -11,6 +12,10 @@ PORTS = {
 
 RETRY_DELAY = 5
 CF_PATH = "/usr/bin/cloudflared"
+
+# direktori output
+OUT_DIR = "/home/user/online/"
+os.makedirs(OUT_DIR, exist_ok=True)
 
 def try_start_tunnel(port):
     """Coba sekali, return url kalau dapat, kalau gagal return None."""
@@ -47,8 +52,10 @@ def try_start_tunnel(port):
 
 
 def write_url(filename, url):
-    with open(filename, "w") as f:
+    fullpath = os.path.join(OUT_DIR, filename)
+    with open(fullpath, "w") as f:
         f.write(url)
+    print(f"[SAVE] {fullpath} → {url}")
 
 
 if __name__ == "__main__":
