@@ -2,9 +2,6 @@ import subprocess
 import time
 import re
 
-# ============================
-# Konfigurasi Port
-# ============================
 PORTS = {
     "8080": "url8080.txt",
     "5001": "url5001.txt",
@@ -12,59 +9,104 @@ PORTS = {
     "5003": "url5003.txt",
 }
 
-# ============================
-# Fungsi start tunnel
-# ============================
-def start_tunnel(port):
-    print(f"[INFO] Membuat tunnel untuk port {port} ...")
+RETRY_DELAY = 5
+CF_PATH = "/usr/bin/cloudflared"
 
-    cmd = [
-        "cloudflared", "tunnel", "--url", f"http://localhost:{port}"
-    ]
+def try_start_tunnel(port):
+    """Coba sekali, return url kalau dapat, kalau gagal return None."""
+    print(f"\n[TRY] Port {port} → start cloudflare tunnel")
 
-    # jalankan dan ambil output
+    cmd = [CF_PATH, "tunnel", "--url", f"http://localhost:{port}"]
     proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
 
     url = None
+    start_time = time.time()
 
-    # tunggu sampai URL muncul
     while True:
         line = proc.stdout.readline()
         if not line:
             break
 
-        print(line.strip())
-
+        print(f"  {line.strip()}")
         m = re.search(r"https://[-a-zA-Z0-9\.]+trycloudflare\.com", line)
+
         if m:
             url = m.group(0)
             break
 
+        # timeout baca output
+        if time.time() - start_time > 15:
+            break
+
+    # tutup jika URL tidak dapat
+    if not url:
+        proc.terminate()
+        return None, None
+
     return url, proc
 
 
-# ============================
-# MAIN
-# ============================
-procs = []
+def write_url(filename, url):
+    with open(filename, "w") as f:
+        f.write(url)
 
-for port, filename in PORTS.items():
-    url, proc = start_tunnel(port)
-    procs.append(proc)
 
-    if url:
-        with open(filename, "w") as f:
-            f.write(url)
-        print(f"[OK] URL port {port} disimpan ke {filename} → {url}")
-    else:
-        print(f"[ERROR] Gagal mendapatkan URL untuk port {port}")
+if __name__ == "__main__":
 
-print("\nSemua tunnel sudah dijalankan dan URL disimpan.")
-print("Tekan CTRL+C untuk menghentikan semua tunnel.")
-try:
+    processes = {}      # port → process
+    results = {}        # port → url or None
+
+    # ==========================================
+    # 1) COBA SEMUA PORT SEKALI DULU
+    # ==========================================
+    print("\n=========== MULAI SCAN SEMUA PORT ===========")
+
+    for port, fname in PORTS.items():
+        url, proc = try_start_tunnel(port)
+        results[port] = url
+
+        if url:
+            processes[port] = proc
+            print(f"[OK] Port {port} dapat URL → {url}")
+            write_url(fname, url)
+        else:
+            print(f"[FAIL] Port {port} belum dapat URL")
+
+    # ==========================================
+    # 2) LOOP ULANGI HANYA YANG GAGAL
+    # ==========================================
     while True:
-        time.sleep(1)
-except KeyboardInterrupt:
-    print("Menutup semua tunnel...")
-    for p in procs:
-        p.terminate()
+        failed = [p for p, url in results.items() if url is None]
+
+        if not failed:
+            print("\n🎉 Semua port sudah dapat URL! Sistem aktif penuh.\n")
+            break
+
+        print(f"\n[RETRY] Port gagal: {failed}. Coba lagi {RETRY_DELAY} detik...")
+        time.sleep(RETRY_DELAY)
+
+        for port in failed:
+            fname = PORTS[port]
+            url, proc = try_start_tunnel(port)
+
+            if url:
+                results[port] = url
+                processes[port] = proc
+                write_url(fname, url)
+                print(f"[OK] Port {port} berhasil setelah retry → {url}")
+            else:
+                print(f"[FAIL] Port {port} masih gagal, lanjut...")
+
+    # ==========================================
+    # 3) KEEPRUNNING (standby) sampai CTRL+C
+    # ==========================================
+    print("All tunnels running. Tekan CTRL+C untuk stop.\n")
+
+    try:
+        while True:
+            time.sleep(1)
+    except KeyboardInterrupt:
+        print("\nMenutup semua tunnel...")
+        for p in processes.values():
+            p.terminate()
+        print("Selesai.")
