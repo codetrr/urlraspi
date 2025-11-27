@@ -1,1 +1,1 @@
-https://editing-trivia-adapted-struct.trycloudflare.com
+https://api.trycloudflare.com

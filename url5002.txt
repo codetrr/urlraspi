@@ -1,1 +1,1 @@
-https://geology-surprise-bomb-teddy.trycloudflare.com
+https://api.trycloudflare.com
