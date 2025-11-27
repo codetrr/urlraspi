@@ -1,1 +1,1 @@
-https://sheriff-oxford-present-distinguished.trycloudflare.com
+https://api.trycloudflare.com
