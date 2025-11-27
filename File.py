@@ -3,48 +3,63 @@ import time
 import subprocess
 from datetime import datetime
 
+# Folder kerja
 FOLDER = "/home/user/online"
-FILE = "File.txt"
 REPO = FOLDER
 
-PATH = os.path.join(FOLDER, FILE)
+# Daftar file URL
+FILES = [
+    "url8080.txt",
+    "url5001.txt",
+    "url5002.txt",
+    "url5003.txt"
+]
 
-def get_subdomain():
+# Ambil bagian subdomain "XXX" dari "https://XXX.trycloudflare.com"
+def extract_subdomain(url: str):
+    url = url.strip()
+    if "trycloudflare.com" in url:
+        # contoh "https://abc123.trycloudflare.com"
+        return url.split("//")[-1].split(".")[0]
+    return ""
+
+# Baca isi file dan ekstrak subdomain
+def read_subdomain(filepath: str):
     try:
-        with open(PATH, "r") as f:
-            content = f.read().strip()
-        # contoh: https://abcd123.trycloudflare.com
-        if "trycloudflare.com" in content:
-            # ambil bagian XXX
-            return content.split("//")[-1].split(".")[0]
-        return ""
+        with open(filepath, "r") as f:
+            content = f.read()
+        return extract_subdomain(content)
     except:
         return ""
 
-def git_push():
-    print("[GIT] Subdomain berubah → upload GitHub")
+# Upload ke GitHub
+def git_push(changed_file):
+    print(f"[GIT] Upload perubahan dari {changed_file} ...")
     try:
         subprocess.call(["git", "add", "."], cwd=REPO)
         subprocess.call([
             "git", "commit", "-m",
-            f"Auto update subdomain {datetime.now()}"
+            f"Auto update {changed_file} - {datetime.now()}"
         ], cwd=REPO)
         subprocess.call(["git", "push"], cwd=REPO)
     except Exception as e:
         print("GIT ERROR:", e)
 
 def main():
-    last_sub = ""
+    print("Monitoring 4 URL TryCloudflare...")
 
-    print("Monitoring subdomain trycloudflare...")
+    # Simpan subdomain terakhir
+    last = {f: "" for f in FILES}
 
     while True:
-        current_sub = get_subdomain()
+        for f in FILES:
+            path = os.path.join(FOLDER, f)
+            sub = read_subdomain(path)
 
-        if current_sub and current_sub != last_sub:
-            print(f"[CHANGE] {last_sub} → {current_sub}")
-            git_push()
-            last_sub = current_sub
+            if sub and sub != last[f]:
+                print(f"[CHANGE] {f}: {last[f]} → {sub}")
+                git_push(f)
+                last[f] = sub
 
         time.sleep(3)
 
