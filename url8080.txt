@@ -1,1 +1,1 @@
-https://chairman-jet-inspiration-rescue.trycloudflare.com
+https://api.trycloudflare.com
