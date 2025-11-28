@@ -1,1 +1,1 @@
-https://coupled-thorough-grove-dressed.trycloudflare.com
+https://api.trycloudflare.com

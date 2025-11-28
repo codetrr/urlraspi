@@ -1,1 +1,1 @@
-https://admitted-consensus-circuits-dried.trycloudflare.com
+https://api.trycloudflare.com
