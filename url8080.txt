@@ -1,1 +1,1 @@
-https://textbook-foster-affiliated-require.trycloudflare.com
+https://api.trycloudflare.com
