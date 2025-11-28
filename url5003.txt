@@ -1,1 +1,1 @@
-https://api.trycloudflare.com
+https://olympics-automobile-given-controlling.trycloudflare.com
