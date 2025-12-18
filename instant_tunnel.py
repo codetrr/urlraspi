@@ -8,7 +8,7 @@ PORTS = {
     "5001": "url5001.txt",
     "5002": "url5002.txt",
     "5003": "url5003.txt",
-    "22": "url5003.txt",
+    "22": "url22.txt",
 }
 
 RETRY_DELAY = 5
