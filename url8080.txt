@@ -1,1 +1,1 @@
-https://all-parents-fence-angle.trycloudflare.com
+https://api.trycloudflare.com
