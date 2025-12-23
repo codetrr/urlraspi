@@ -1,1 +1,1 @@
-https://ext-cam-window-heavy.trycloudflare.com
+https://api.trycloudflare.com
