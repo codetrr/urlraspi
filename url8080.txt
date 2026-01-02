@@ -1,1 +1,1 @@
-https://examines-leaf-awareness-scripting.trycloudflare.com
+https://api.trycloudflare.com
