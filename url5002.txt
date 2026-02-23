@@ -1,1 +1,1 @@
-https://surrey-scripts-deviation-cache.trycloudflare.com
+https://api.trycloudflare.com
