@@ -1,1 +1,1 @@
-https://stolen-missions-geneva-lender.trycloudflare.com
+https://api.trycloudflare.com
