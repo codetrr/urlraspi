@@ -1,1 +1,1 @@
-https://pulse-twins-acquire-noble.trycloudflare.com
+https://api.trycloudflare.com
