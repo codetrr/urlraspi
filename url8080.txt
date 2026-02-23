@@ -1,1 +1,1 @@
-https://operation-click-exhaust-facilities.trycloudflare.com
+https://api.trycloudflare.com
